@@ -70,7 +70,55 @@ conn = sqlite3.connect(DB_PATH) # Conecta ao banco de dados SQLite usando o cami
 ano_atual = datetime.now().year
 
 cursor = conn.cursor() # Cria um cursor para executar comandos SQL
+
 cursor.execute(f"SELECT COUNT(*) FROM certificados WHERE ano_filtro = {ano_atual}")
 total_certificados = cursor.fetchone()[0]
 conn.commit()
 
+cursor.execute("SELECT MAX(data_certificado) FROM certificados")
+data_bruta = cursor.fetchone()[0]
+conn.commit()
+
+conn.close() 
+
+if data_bruta:
+    # Como a string vem com "AAAA-MM-DD 00:00:00", pegamos apenas a parte da data (os primeiros 10 caracteres)
+    data_limpa = data_bruta[:10] 
+    
+    # Converte o padrão "AAAA-MM-DD" para o objeto datetime
+    objeto_data = datetime.strptime(data_limpa, "%Y-%m-%d")
+    
+    # Formata para o padrão brasileiro "DD/MM/AAAA"
+    ultima_atualizacao = objeto_data.strftime("%d/%m/%Y")
+else:
+    # Caso a tabela esteja vazia por algum motivo
+    ultima_atualizacao = "Sem dados"
+
+try:
+    url_completa = f"{API_URL}/certificados?ano={ano_atual}"
+
+except Exception as e:
+    st.error(f"Erro ao montar a URL: {str(e)}")
+    st.stop()
+
+with st.spinner("Buscando dados na API..."):
+    response = requests.get(url_completa)
+
+if response.status_code == 200:
+    ocd_lider = response.json()["result"][0]["ocd"]
+    qtd_ocd_lider = response.json()["result"][0]["quantidade_de_certificado"]
+    qtd_total_certificados = 0
+
+    for ocd in response.json()["result"]:
+        qtd_total_certificados += ocd["quantidade_de_certificado"]
+
+    if qtd_total_certificados is not None and qtd_total_certificados != 0:
+        porcentagem_share = qtd_ocd_lider / qtd_total_certificados * 100
+    else:
+        porcentagem_share = 0
+elif response.status_code == 404:
+    st.warning(response.json().get("mensagem"))
+    st.stop()
+else:
+    st.error(response.json().get("mensagem"))
+    st.stop()
