@@ -129,7 +129,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown(f"""
         <div class="card-principal" style="border-left: 5px solid #FF4B4B;">
-            <div class="card-titulo">TOTAL DE CERTIFICADOS</div>
+            <div class="card-titulo">TOTAL DE CERTIFICADOS DE {ano_atual}</div>
             <div class="card-valor">{total_certificados}</div>
         </div>
     """, unsafe_allow_html=True)
@@ -147,7 +147,7 @@ with col2:
 with col3:
     st.markdown(f"""
         <div class="card-principal" style="border-left: 5px solid #00F0AF;">
-            <div class="card-titulo">ÚLTIMA ATUALIZAÇÃO ANATEL</div>
+            <div class="card-titulo">ÚLTIMA ATUALIZAÇÃO ANATEL DE {ano_atual}</div>
             <div class="card-valor">{ultima_atualizacao}</div>
         </div>
     """, unsafe_allow_html=True)
