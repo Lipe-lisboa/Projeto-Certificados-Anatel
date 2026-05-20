@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 from utils import API_URL
 import requests
+from datetime import datetime
 
 st.set_page_config(page_title="Market Share OCD", layout="wide", initial_sidebar_state="expanded")
 
@@ -51,3 +52,25 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+
+
+# 1. Pega o caminho de onde este arquivo .py está
+CURRENT_DIR = Path(__file__).resolve().parent
+
+# 2. sobe dois niveis sai de 'app' e sai de 'frontend' para chegar na raiz
+ROOT_DIR = CURRENT_DIR.parent
+
+
+DB_PATH = ROOT_DIR / "backend" / "src" /"banco.db"
+
+
+conn = sqlite3.connect(DB_PATH) # Conecta ao banco de dados SQLite usando o caminho fornecido
+
+ano_atual = datetime.now().year
+
+cursor = conn.cursor() # Cria um cursor para executar comandos SQL
+cursor.execute(f"SELECT COUNT(*) FROM certificados WHERE ano_filtro = {ano_atual}")
+total_certificados = cursor.fetchone()[0]
+conn.commit()
+
