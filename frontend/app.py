@@ -122,3 +122,32 @@ elif response.status_code == 404:
 else:
     st.error(response.json().get("mensagem"))
     st.stop()
+
+# Criando os cards lado a lado
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown(f"""
+        <div class="card-principal" style="border-left: 5px solid #FF4B4B;">
+            <div class="card-titulo">TOTAL DE CERTIFICADOS</div>
+            <div class="card-valor">{total_certificados}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown(f"""
+        <div class="card-principal" style="border-left: 5px solid #00F0FF;">
+            <div class="card-titulo">OCD LÍDER DE {ano_atual}</div>
+            <div class="card-valor-container">
+                <span class="card-valor">{ocd_lider}</span>
+                <span class="card-delta-positivo">(+{porcentagem_share:.2f}%)</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown(f"""
+        <div class="card-principal" style="border-left: 5px solid #00F0AF;">
+            <div class="card-titulo">ÚLTIMA ATUALIZAÇÃO ANATEL</div>
+            <div class="card-valor">{ultima_atualizacao}</div>
+        </div>
+    """, unsafe_allow_html=True)
