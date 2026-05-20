@@ -129,30 +129,30 @@ class DataProcessor:
             }
 
     # Método para contar a quantidade de certificados por órgão certificador, com opções de filtragem por ano, mês e OCD específico
-    def contar_certificados(self, ano:int, mes:str, ocd_enviado: Optional[str] = None):
+    def contar_certificados(self, ano:Optional[int] = None, mes:Optional[str] = None, ocd_enviado: Optional[str] = None):
 
-        # Converte o nome do mês em texto para o número correspondente (ex: 'janeiro' -> 1)
-        mes_num = self.lista_mes.get(mes.lower())
+        if mes is not None:
+            # Converte o nome do mês em texto para o número correspondente (ex: 'janeiro' -> 1)
+            mes_num = self.lista_mes.get(mes.lower())
+        else:
+            mes_num = None
+        
+        if ano is not None and mes_num is not None:
+            comando_sql = f"SELECT * FROM certificados WHERE ano_filtro = {ano} AND mes_filtro = {mes_num}"
+        elif ano is not None and mes_num is None:
+            comando_sql = f"SELECT * FROM certificados WHERE ano_filtro = {ano}"
+        elif ano is None and mes_num is not None:
+            comando_sql = f"SELECT * FROM certificados WHERE mes_filtro = {mes_num}"
+        else:
+            comando_sql = "SELECT * FROM certificados"
 
-        # Verifica se o mês enviado é válido, ou seja, se existe no dicionário de meses.
-        # Se não for válido, retorna uma resposta de erro indicando que o mês é inválido.
-        if not mes_num:
-            return {
-                "status": "Fail",
-                "mensagem": "Mês inválido enviado.",
-                'status_code': 400
-            }
 
         try:
             # Abre conexão e busca dados filtrados do banco usando Pandas
             conn = sqlite3.connect(self.db_path)
-            
-            # Monta a query SQL para selecionar os dados do ano e mês específicos, 
-            # garantindo que apenas os dados relevantes sejam carregados para o DataFrame
-            query = f"SELECT * FROM certificados WHERE ano_filtro = {ano} AND mes_filtro = {mes_num}"
-            
+
             # Lê os dados diretamente para um DataFrame do Pandas, facilitando a manipulação e filtragem dos dados
-            df = pd.read_sql_query(query, conn)
+            df = pd.read_sql_query(comando_sql, conn)
             conn.close()
 
         # Tratamento de erros para garantir que qualquer problema na consulta ao banco seja capturado 
