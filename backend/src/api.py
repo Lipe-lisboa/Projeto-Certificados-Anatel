@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from services.data_processor import DataProcessor
 from services.file_manager import FileManager
 from pathlib import Path
+from typing import Optional
 
 # 1. Pega o caminho de onde este arquivo .py está
 CURRENT_DIR = Path(__file__).resolve().parent
@@ -61,7 +62,7 @@ def certificados_ocd(ocd_enviado: str,ano:int, mes:str):
 
 
 @app.get("/certificados")
-def certificados_ocds(ano:int, mes:str):
+def certificados_ocds(ano: Optional[int] = None, mes: Optional[str] = None):
     try:
         result = processor.contar_certificados(ano, mes)
 
