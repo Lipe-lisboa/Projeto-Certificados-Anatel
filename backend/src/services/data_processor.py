@@ -3,7 +3,7 @@ import pandas as pd
 from typing import Optional
 import sqlite3
 from utils.functios import ocds
-
+from utils.utils import LISTA_MES, DICT_NAME  
 
 # Classe responsável por processar os dados dos certificados, incluindo leitura do CSV, filtragem por ano e mês, e contagem de certificados por órgão certificador
 class DataProcessor:
@@ -12,40 +12,6 @@ class DataProcessor:
         self.root_dir = root_dir
         self.docs_dir = docs_dir
         self.db_path = db_path
-
-        # Dicionário para mapear os nomes dos meses em português para seus respectivos códigos numéricos
-        self.lista_mes = {
-            'janeiro': '1',
-            'fevereiro': '2',
-            'março':'3',
-            'abril': '4',
-            'maio': '5',
-            'junho': '6',
-            'julho': '7',
-            'agosto': '8',
-            'setembro': '9',
-            'outubro': '10',
-            'novembro': '11',
-            'dezembro': '12',
-        }
-
-        # Dicionário para mapear os nomes dos órgãos certificadores para nomes mais amigáveis ou padronizados
-        self.dict_name = {
-            'UL-BR': 'UL',
-            'OCP': 'OCPTELLI',
-            'ABCP-OCD':'ABCP',
-            'OCD':'BRICS',
-            'MT':'MASTER',
-            'ELD':'ELDORADO',
-            'QC':'QCCERT',
-            'TÜV': 'TUV',
-            'BRC': 'BRACERT',
-            'BRA': 'BR APPROVAL',
-            'TELECOM': 'INTERTEK',
-            'IBR': 'IBR TECH',
-            'TEL': 'ACTA',
-            '7C': 'SEVEN COMPLIANCE'
-        }
 
     # Método para processar os dados do CSV, filtrar por ano e salvar os dados processados no banco de dados SQLite
     def process_and_save_to_db(self, ano:int):
@@ -133,7 +99,7 @@ class DataProcessor:
 
         if mes is not None:
             # Converte o nome do mês em texto para o número correspondente (ex: 'janeiro' -> 1)
-            mes_num = self.lista_mes.get(mes.lower())
+            mes_num = LISTA_MES.get(mes.lower())
         else:
             mes_num = None
         
@@ -195,8 +161,8 @@ class DataProcessor:
                 quantidade_certificados = df_filtrado[coluna].nunique()
 
                 if quantidade_certificados:
-                    if ocd in self.dict_name:
-                        ocd = self.dict_name[ocd]
+                    if ocd in DICT_NAME:
+                        ocd = DICT_NAME[ocd]
                     saida[ocd.upper()] = quantidade_certificados
 
         # Agrupamentos específicos (ABCP vs BRICS / CPQD / OCPTELLI)
