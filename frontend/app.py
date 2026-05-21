@@ -1,7 +1,7 @@
 import streamlit as st
 import sqlite3
 from pathlib import Path
-from utils import API_URL
+from utils import API_URL, NUM_PARA_MES_PT
 import requests
 from datetime import datetime
 import pandas as pd
@@ -55,8 +55,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
 # 1. Pega o caminho de onde este arquivo .py está
 CURRENT_DIR = Path(__file__).resolve().parent
 
@@ -70,6 +68,7 @@ DB_PATH = ROOT_DIR / "backend" / "src" /"banco.db"
 conn = sqlite3.connect(DB_PATH) # Conecta ao banco de dados SQLite usando o caminho fornecido
 
 ano_atual = datetime.now().year
+mes_atual_int = datetime.now().month
 
 cursor = conn.cursor() # Cria um cursor para executar comandos SQL
 
@@ -120,6 +119,7 @@ if response.status_code == 200:
 
     df_top5 = df.head(5)
     df_outros = df.iloc[5:].sum()
+    print(df_top5)
 
 
     for ocd in response.json()["result"]:
@@ -170,9 +170,74 @@ with col3:
     """, unsafe_allow_html=True)
 
 
+
 st.subheader(f"Top 5 OCDs com mais certificados em {ano_atual}")
 
 df_pizza = pd.concat([df_top5, pd.DataFrame([{'ocd': 'OUTROS', 'quantidade_de_certificado': df_outros['quantidade_de_certificado']}])])
 
 fig = px.pie(df_pizza, values='quantidade_de_certificado', names='ocd')
-st.plotly_chart(fig)    
+st.plotly_chart(fig)
+
+dic_top5 = []
+ordem_dos_meses = []
+
+for i in range(mes_atual_int):
+
+    mes_nome = NUM_PARA_MES_PT[str(i+1)]
+    mes_num = i + 1
+
+    ordem_dos_meses.append(mes_nome)
+
+    for ocd in df_top5['ocd']:
+
+        try:
+            url_completa = f"{API_URL}/certificados/{ocd}?ano={ano_atual}&mes={mes_nome}"
+            response = requests.get(url_completa)
+
+        except Exception as e:
+            st.error(f"Erro ao montar a URL: {str(e)}")
+            st.stop()
+
+        if response.status_code == 200:
+            quantidade_certificados = response.json()["result"][0]["quantidade_de_certificado"]
+            dic_top5.append({
+                'ocd': ocd,
+                'mes': mes_nome,
+                'mes_num': mes_num,
+                'quantidade_de_certificado': quantidade_certificados
+            })
+        elif response.status_code == 404:
+            dic_top5.append({
+                'ocd': ocd,
+                'mes': mes_nome,
+                'mes_num': mes_num,
+                'quantidade_de_certificado': 0
+            })
+        else:
+            st.error(response.json().get("mensagem"))
+            st.stop()
+
+# --- AQUI ENTRA A CRIAÇÃO DO GRÁFICO ---
+
+if dic_top5:
+    # Ordena o DataFrame numericamente pelo número do mês
+    df_grafico = pd.DataFrame(dic_top5).sort_values(by="mes_num")
+
+    # Define a ordem dos meses usando a lista de meses em português
+    df_grafico['mes'] = pd.Categorical(df_grafico['mes'], categories=ordem_dos_meses, ordered=True)
+    
+    st.subheader("📈 Crescimento do Volume de Certificados (Top 5 OCDs)")
+    
+    # Renderiza o gráfico
+    st.line_chart(
+        data=df_grafico,
+        x="mes",                                
+        y="quantidade_de_certificado",          
+        color="ocd",
+        x_label="Meses",
+        y_label="Quantidade de Certificados",
+        height=450,            
+        use_container_width=True                
+    )
+else:
+    st.info("Nenhum dado encontrado para gerar o gráfico de evolução.")
