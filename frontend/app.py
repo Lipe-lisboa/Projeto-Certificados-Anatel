@@ -4,6 +4,8 @@ from pathlib import Path
 from utils import API_URL
 import requests
 from datetime import datetime
+import pandas as pd
+import plotly.express as px
 
 st.set_page_config(page_title="Market Share OCD", layout="wide", initial_sidebar_state="expanded")
 
@@ -109,6 +111,17 @@ if response.status_code == 200:
     qtd_ocd_lider = response.json()["result"][0]["quantidade_de_certificado"]
     qtd_total_certificados = 0
 
+    dados_gerais = response.json()["result"]
+    df = pd.DataFrame(dados_gerais)
+
+    if df.empty:
+        st.warning(f"Nenhum dado encontrado para o ano de {ano_atual}.")
+        st.stop()
+
+    df_top5 = df.head(5)
+    df_outros = df.iloc[5:].sum()
+
+
     for ocd in response.json()["result"]:
         qtd_total_certificados += ocd["quantidade_de_certificado"]
 
@@ -116,9 +129,13 @@ if response.status_code == 200:
         porcentagem_share = qtd_ocd_lider / qtd_total_certificados * 100
     else:
         porcentagem_share = 0
+
+
 elif response.status_code == 404:
     st.warning(response.json().get("mensagem"))
     st.stop()
+
+
 else:
     st.error(response.json().get("mensagem"))
     st.stop()
@@ -151,3 +168,11 @@ with col3:
             <div class="card-valor">{ultima_atualizacao}</div>
         </div>
     """, unsafe_allow_html=True)
+
+
+st.subheader(f"Top 5 OCDs com mais certificados em {ano_atual}")
+
+df_pizza = pd.concat([df_top5, pd.DataFrame([{'ocd': 'OUTROS', 'quantidade_de_certificado': df_outros['quantidade_de_certificado']}])])
+
+fig = px.pie(df_pizza, values='quantidade_de_certificado', names='ocd')
+st.plotly_chart(fig)    
