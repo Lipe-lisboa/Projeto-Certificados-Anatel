@@ -149,7 +149,7 @@ Retorna a quantidade de certificados emitidos por uma organização específica 
 * **Parâmetros de Query:**
   * `OCD` (obrigatório): O nome da organização na URL (ex: MODERNA).
   * `Ano` (obrigatório): O ano de busca (ex: 2026)
-  * `ês` (obrigatório): Mês de busca em letras maiúsculas (ex: JANEIRO).
+  * `Mês` (obrigatório): Mês de busca em letras maiúsculas (ex: JANEIRO).
 
 <details>
 <summary><b>▶ Ver Exemplo de Resposta (200 OK)</b></summary>
