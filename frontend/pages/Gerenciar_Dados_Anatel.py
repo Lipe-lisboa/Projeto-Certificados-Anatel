@@ -2,7 +2,7 @@ import streamlit as st
 from utils import API_URL
 import requests
 
-st.header("Carregar Dados Anatel")
+st.title("Carregar Dados Anatel")
 
 ano = st.number_input("Ano", value=2026,max_value=2026 ,key="ano_p")
 

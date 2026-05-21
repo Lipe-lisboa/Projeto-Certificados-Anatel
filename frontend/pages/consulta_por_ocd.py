@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 
 
-st.header("Consulta Individual")
+st.title("Consulta Individual")
 
 ocd_nome = st.text_input("Digite o nome da OCD (Ex: MODERNA, NCC, ICC):").upper()
 ano_o = st.number_input("Ano", value=2026,max_value=2026 ,key="ano_o")

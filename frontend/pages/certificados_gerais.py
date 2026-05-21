@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 import plotly.express as px
 
-st.header("Quantidade de Certificados por OCD")
+st.title("Quantidade de Certificados por OCD")
 
 ano_g = st.number_input("Ano", min_value=2020, max_value=2026, value=2026, key="ano_g")
 mes_g = st.selectbox(
