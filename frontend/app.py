@@ -119,7 +119,6 @@ if response.status_code == 200:
 
     df_top5 = df.head(5)
     df_outros = df.iloc[5:].sum()
-    print(df_top5)
 
 
     for ocd in response.json()["result"]:
