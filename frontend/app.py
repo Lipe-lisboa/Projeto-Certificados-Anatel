@@ -110,6 +110,8 @@ except Exception as e:
 with st.spinner("Buscando dados na API..."):
     response = requests.get(url_completa)
 
+status_porcentagem_share = None
+
 if response.status_code == 200:
     
     qtd_total_certificados = 0
@@ -136,8 +138,16 @@ if response.status_code == 200:
             porcentagem_share = qtd_ocd_lider / qtd_total_certificados * 100
         else:
             porcentagem_share = 0
+
+
+        if porcentagem_share > 0:
+            status_porcentagem_share = "positivo"
+        elif porcentagem_share < 0:
+            status_porcentagem_share = "negativo"
+        else:
+            status_porcentagem_share = "neutro"
         
-        
+
 
 elif response.status_code == 404:
     st.warning(response.json().get("mensagem"))
@@ -165,7 +175,7 @@ with col2:
             <div class="card-titulo">OCD LÍDER DE {ano_atual}</div>
             <div class="card-valor-container">
                 <span class="card-valor">{ocd_lider}</span>
-                <span class="card-delta-positivo">(+{porcentagem_share:.2f}%)</span>
+                <span class="card-delta-{status_porcentagem_share}">(+{porcentagem_share:.2f}%)</span>
         </div>
     """, unsafe_allow_html=True)
 
