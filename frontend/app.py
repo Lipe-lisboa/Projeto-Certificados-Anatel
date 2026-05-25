@@ -72,13 +72,18 @@ mes_atual_int = datetime.now().month
 
 cursor = conn.cursor() # Cria um cursor para executar comandos SQL
 
-cursor.execute(f"SELECT COUNT(*) FROM certificados WHERE ano_filtro = {ano_atual}")
-total_certificados = cursor.fetchone()[0]
-conn.commit()
+try:
+    cursor.execute(f"SELECT COUNT(*) FROM certificados WHERE ano_filtro = {ano_atual}")
+    total_certificados = cursor.fetchone()[0]
+    conn.commit()
 
-cursor.execute("SELECT MAX(data_certificado) FROM certificados")
-data_bruta = cursor.fetchone()[0]
-conn.commit()
+    cursor.execute("SELECT MAX(data_certificado) FROM certificados")
+    data_bruta = cursor.fetchone()[0]
+    conn.commit()
+
+except Exception as e:
+    total_certificados = 0
+    data_bruta = None  
 
 conn.close() 
 
@@ -93,7 +98,7 @@ if data_bruta:
     ultima_atualizacao = objeto_data.strftime("%d/%m/%Y")
 else:
     # Caso a tabela esteja vazia por algum motivo
-    ultima_atualizacao = "Sem dados"
+    ultima_atualizacao = None
 
 try:
     url_completa = f"{API_URL}/certificados?ano={ano_atual}"
@@ -106,29 +111,33 @@ with st.spinner("Buscando dados na API..."):
     response = requests.get(url_completa)
 
 if response.status_code == 200:
-    ocd_lider = response.json()["result"][0]["ocd"]
-    qtd_ocd_lider = response.json()["result"][0]["quantidade_de_certificado"]
+    
     qtd_total_certificados = 0
+    ocd_lider = None
+    porcentagem_share = 0
 
-    dados_gerais = response.json()["result"]
-    df = pd.DataFrame(dados_gerais)
-
-    if df.empty:
-        st.warning(f"Nenhum dado encontrado para o ano de {ano_atual}.")
-        st.stop()
-
-    df_top5 = df.head(5)
-    df_outros = df.iloc[5:].sum()
+    result = response.json().get("result", [])
+    
+    if result:
+        ocd_lider = result[0]["ocd"]
+        qtd_ocd_lider = result[0]["quantidade_de_certificado"]
 
 
-    for ocd in response.json()["result"]:
-        qtd_total_certificados += ocd["quantidade_de_certificado"]
+        df = pd.DataFrame(result)
 
-    if qtd_total_certificados is not None and qtd_total_certificados != 0:
-        porcentagem_share = qtd_ocd_lider / qtd_total_certificados * 100
-    else:
-        porcentagem_share = 0
+        df_top5 = df.head(5)
+        df_outros = df.iloc[5:].sum()
 
+
+        for ocd in result:
+            qtd_total_certificados += ocd["quantidade_de_certificado"]
+
+        if qtd_total_certificados is not None and qtd_total_certificados != 0:
+            porcentagem_share = qtd_ocd_lider / qtd_total_certificados * 100
+        else:
+            porcentagem_share = 0
+        
+        
 
 elif response.status_code == 404:
     st.warning(response.json().get("mensagem"))
@@ -168,7 +177,9 @@ with col3:
         </div>
     """, unsafe_allow_html=True)
 
-
+if not result:
+    st.warning(f"Nenhum dado encontrado para o ano de {ano_atual}.")
+    st.stop()
 
 st.subheader(f"Top 5 OCDs com mais certificados em {ano_atual}")
 
