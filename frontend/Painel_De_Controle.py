@@ -6,6 +6,7 @@ import requests
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
+from utils import comando_sql
 
 st.set_page_config(page_title="Market Share OCD", layout="wide", initial_sidebar_state="expanded")
 
@@ -55,41 +56,21 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 1. Pega o caminho de onde este arquivo .py está
-CURRENT_DIR = Path(__file__).resolve().parent
-
-# 2. sobe dois niveis sai de 'app' e sai de 'frontend' para chegar na raiz
-ROOT_DIR = CURRENT_DIR.parent
-
-
-DB_PATH = ROOT_DIR / "backend" / "src" /"banco.db"
-
-
-conn = sqlite3.connect(DB_PATH) # Conecta ao banco de dados SQLite usando o caminho fornecido
-
 ano_atual = datetime.now().year
 mes_atual_int = datetime.now().month
 
-cursor = conn.cursor() # Cria um cursor para executar comandos SQL
+dados_total_certificados, _ = comando_sql(f"SELECT COUNT(*) FROM certificados WHERE ano_filtro = {ano_atual}")
+dados_data_bruta, _ = comando_sql("SELECT MAX(data_certificado) FROM certificados")
 
-try:
-    cursor.execute(f"SELECT COUNT(*) FROM certificados WHERE ano_filtro = {ano_atual}")
-    total_certificados = cursor.fetchone()[0]
-    conn.commit()
-
-    cursor.execute("SELECT MAX(data_certificado) FROM certificados")
-    data_bruta = cursor.fetchone()[0]
-    conn.commit()
-
-except Exception as e:
+if dados_total_certificados:
+    total_certificados = dados_total_certificados[0][0]
+else:
     total_certificados = 0
-    data_bruta = None  
 
-conn.close() 
 
-if data_bruta:
+if dados_data_bruta:
     # Como a string vem com "AAAA-MM-DD 00:00:00", pegamos apenas a parte da data (os primeiros 10 caracteres)
-    data_limpa = data_bruta[:10] 
+    data_limpa = dados_data_bruta[0][0][:10] 
     
     # Converte o padrão "AAAA-MM-DD" para o objeto datetime
     objeto_data = datetime.strptime(data_limpa, "%Y-%m-%d")
@@ -209,7 +190,7 @@ for i in range(mes_atual_int):
     ordem_dos_meses.append(mes_nome)
 
     for ocd in df_top5['ocd']:
-
+        
         try:
             url_completa = f"{API_URL}/certificados/{ocd}?ano={ano_atual}&mes={mes_nome}"
             response = requests.get(url_completa)
@@ -219,13 +200,16 @@ for i in range(mes_atual_int):
             st.stop()
 
         if response.status_code == 200:
-            quantidade_certificados = response.json()["result"][0]["quantidade_de_certificado"]
-            dic_top5.append({
-                'ocd': ocd,
-                'mes': mes_nome,
-                'mes_num': mes_num,
-                'quantidade_de_certificado': quantidade_certificados
-            })
+            if response.json()["result"] is not None:
+                quantidade_certificados = response.json()["result"][0]["quantidade_de_certificado"]
+
+                dic_top5.append({
+                    'ocd': ocd,
+                    'mes': mes_nome,
+                    'mes_num': mes_num,
+                    'quantidade_de_certificado': quantidade_certificados
+                })
+                
         elif response.status_code == 404:
             dic_top5.append({
                 'ocd': ocd,
