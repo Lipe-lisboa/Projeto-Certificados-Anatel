@@ -218,7 +218,8 @@ for i in range(mes_atual_int):
             st.error(f"Erro ao montar a URL: {str(e)}")
             st.stop()
 
-        if response.status_code == 200:
+        if response.status_code == 200 and response.json()["result"] is not None and response.json()["result"] != []:
+            print(response.json()["result"])
             quantidade_certificados = response.json()["result"][0]["quantidade_de_certificado"]
             dic_top5.append({
                 'ocd': ocd,
@@ -226,6 +227,8 @@ for i in range(mes_atual_int):
                 'mes_num': mes_num,
                 'quantidade_de_certificado': quantidade_certificados
             })
+        elif response.status_code == 200 and response.json()["result"] is None or response.json()["result"] == []:
+            pass
         elif response.status_code == 404:
             dic_top5.append({
                 'ocd': ocd,
