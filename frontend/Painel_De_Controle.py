@@ -1,6 +1,4 @@
 import streamlit as st
-import sqlite3
-from pathlib import Path
 from utils import API_URL, NUM_PARA_MES_PT
 import requests
 from datetime import datetime
