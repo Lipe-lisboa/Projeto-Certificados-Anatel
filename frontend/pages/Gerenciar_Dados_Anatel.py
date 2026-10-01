@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Adiciona o diretório 'frontend' ao caminho do Python
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import streamlit as st
 from utils import API_URL
 import requests
@@ -5,6 +11,8 @@ from datetime import datetime
 from utils import comando_sql
 import pandas as pd
 import math
+
+
 
 st.title("Carregar Dados Anatel")
 
