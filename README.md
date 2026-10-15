@@ -21,19 +21,14 @@ API para mapeamento de Market Share de Organismos de Certificação Designados (
 1. Clonar repositório git
    ```bash
    git clone https://github.com/Lipe-lisboa/Projeto-Moderna.git
-
    ```
 2. Crie um ambiente virtual e faça o dowload das bibliotecas necessárias
    ```bash
    pip install -r requirements.txt
-
-
    ```
 3. Renomeie o arquivo banco_exemplo.db para que o sistema reconheça o banco de dados
    ```bash
    Altere o nome de banco_exemplo.db para banco.db
-
-
    ```
 
 ## 🛠️ Inicializando a Aplicação
@@ -44,8 +39,6 @@ API para mapeamento de Market Share de Organismos de Certificação Designados (
   cd backend
   cd src  
   uvicorn api:app --reload
-
-
   ```
 
 ### 🎨 Executando o Frontend (Streamlit)
@@ -59,7 +52,6 @@ Com a API já em execução, **abra uma nova aba ou janela do seu terminal** e s
 2. Execute a aplicação do Streamlit:
    ```bash
    streamlit run app.py
-
    ```
 
 O dashboard em Streamlit abrirá automaticamente no seu navegador pelo endereço: http://localhost:8501
