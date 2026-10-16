@@ -51,7 +51,7 @@ Com a API já em execução, **abra uma nova aba ou janela do seu terminal** e s
    ```
 2. Execute a aplicação do Streamlit:
    ```bash
-   streamlit run app.py
+   streamlit run Painel_De_Controle.py
    ```
 
 O dashboard em Streamlit abrirá automaticamente no seu navegador pelo endereço: http://localhost:8501
@@ -82,7 +82,6 @@ Gera os arquivos no formato Parquet com base no ano fornecido.
     "mensagem": "Arquivos Parquet para o ano 2026 foram criados com sucesso.",
     "result": "Processamento do ano 2026 concluído com sucesso!"
 }
-
 ```
 
 **Exemplo de Requisição:**
@@ -123,7 +122,6 @@ Retorna a listagem e contagem de certificados de todas as OCDs com base no ano e
         }
     ]
 }
-
 ```
 
 **Exemplo de Requisição:**
@@ -157,7 +155,6 @@ Retorna a quantidade de certificados emitidos por uma organização específica 
         }
     ]
 }
-
 ```
 
 **Exemplo de Requisição:**
